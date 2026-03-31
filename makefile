@@ -2,6 +2,7 @@
 DC = docker compose
 UV = uv run
 ALEMBIC = $(UV) alembic
+PRODUCTS_TABLE= "create_products_table"
 
 .PHONY: help up down build ps logs shell-db migrate-gen migrate-up migrate-down test-products
 
@@ -28,6 +29,9 @@ logs: ## Exibe os logs dos containers
 migrate-gen: ## Gera uma nova migração (Ex: make migrate-gen m="nome_da_migracao")
 	$(ALEMBIC) revision --autogenerate -m "$(m)"
 
+migrate-gen-products: ## Gera uma nova migração da tabela de produtos
+	$(ALEMBIC) revision --autogenerate -m "$(PRODUCTS_TABLE)" 
+
 migrate-up: ## Aplica as migrações no banco de dados
 	$(ALEMBIC) upgrade head
 
@@ -39,7 +43,7 @@ shell-db: ## Entra no terminal interativo do Postgres
 
 # --- DEV ---
 run: ## Inicia o servidor FastAPI em modo de desenvolvimento (uvicorn)
-	$(UV) uvicorn app.main:app --reload --host 0.0.0.1 --port 8000
+	$(UV) uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 install: ## Instala as dependências usando o uv
 	uv sync
