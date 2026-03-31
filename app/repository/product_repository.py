@@ -13,3 +13,9 @@ class ProductRepository:
     
     async def create(self, product_data: dict):
         new_product = Product(**product_data)
+        self.db.add(new_product)
+        await self.db.commit()
+        await self.db.refresh(new_product)
+        return new_product
+    
+    
