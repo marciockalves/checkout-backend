@@ -1,8 +1,8 @@
-"""create_products_table
+"""initial_complete_migration
 
-Revision ID: 7c2e038f9c51
+Revision ID: 8b79dfa0b955
 Revises: 
-Create Date: 2026-03-31 17:54:28.131459
+Create Date: 2026-03-31 19:36:42.032622
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '7c2e038f9c51'
+revision: str = '8b79dfa0b955'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -27,6 +27,7 @@ def upgrade() -> None:
     sa.Column('barcode', sa.String(length=50), nullable=False),
     sa.Column('price', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('stock_quantity', sa.Integer(), nullable=False),
+    sa.Column('image_url', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('barcode')
     )

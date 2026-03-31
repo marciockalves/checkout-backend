@@ -13,3 +13,4 @@ class Product(Base):
     barcode: Mapped[str]= mapped_column(String(50), unique=True, nullable=False)
     price: Mapped[float] = mapped_column(Numeric(10,2), nullable=False)
     stock_quantity: Mapped[int] = mapped_column(Integer, default=0)
+    image_url: Mapped[str] = mapped_column(String(255), nullable=True)

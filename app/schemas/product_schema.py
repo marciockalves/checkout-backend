@@ -7,6 +7,7 @@ class ProductBase(BaseModel):
     barcode: str = Field(..., min_length=3)
     price: float = Field(..., gt=0)
     stock_quantity: int = Field(0, ge=0)
+    image_url: str = Field(..., min_length=3)
 
 class ProductCreate(ProductBase):
     pass

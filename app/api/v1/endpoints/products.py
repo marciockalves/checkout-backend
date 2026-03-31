@@ -1,22 +1,42 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.product_schema import ProductCreate, ProductRead
 from app.repository.product_repository import ProductRepository
 from app.db.session import get_db
+from app.services.storage_service import StorageService
 
 
 router =APIRouter()
 
 @router.post("/", response_model=ProductRead)
-async def create_product(product: ProductCreate, db: AssertionError = Depends(get_db)):
+async def create_product(
+    name: str = Form(...),
+    barcode: str = Form(...),
+    price: float = Form(...),
+    stock_quantity: int =  Form(...),
+    file: UploadFile = File(...),
+    db: AssertionError = Depends(get_db)
+    ):
     repo = ProductRepository(db)
+    storage = StorageService()
 
-    existing = await repo.get_by_barcode(product.barcode)
+    existing = await repo.get_by_barcode(barcode)
 
     if existing:
         raise HTTPException(status_code=400, datail= "Barcode already registred")
     
-    return await repo.create(product_data=product.model_dump())
+    image_url = await storage.upload_image(file)
+
+    product_data = {
+        "name": name,
+        "barcode": barcode,
+        "price": price,
+        "stock_quantity": stock_quantity,
+        "image_url": image_url
+    }
+
+
+    return await repo.create(product_data)
 
 @router.get("/{barcode}", response_model=ProductRead)
 async def get_product(barcode: str, db:AsyncSession= Depends(get_db)):
