@@ -47,3 +47,6 @@ run: ## Inicia o servidor FastAPI em modo de desenvolvimento (uvicorn)
 
 install: ## Instala as dependências usando o uv
 	uv sync
+
+barcode-gen:
+	zint -d $(code) -o $(files)
