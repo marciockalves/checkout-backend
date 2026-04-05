@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.product_schema import ProductCreate, ProductRead
+from app.schemas.product_schema import ProductRead, ProductUpdate
 from app.repository.product_repository import ProductRepository
 from app.db.session import get_db
 from app.services.storage_service import StorageService
@@ -23,7 +23,7 @@ async def create_product(
     existing = await repo.get_by_barcode(barcode)
 
     if existing:
-        raise HTTPException(status_code=400, datail= "Barcode already registred")
+        raise HTTPException(status_code=400, detail= "Barcode already registred")
     
     image_url = await storage.upload_image(file)
 
@@ -45,3 +45,21 @@ async def get_product(barcode: str, db:AsyncSession= Depends(get_db)):
     if not product:
         raise HTTPException(status_code=404, detail="Product Not Found")
     return product
+
+@router.put("/{barcode}", response_model=ProductUpdate)
+async def update_produtct(barcode: str, 
+                          payload: ProductUpdate, 
+                          db: AsyncSession = Depends(get_db)):
+
+    repo = ProductRepository(db)
+    updated = await repo.update_by_barcode(barcode, payload)
+
+    print(f"DEBUG: O que o repositório retornou? {updated}")
+
+    if updated is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Produto {barcode} não encontrado"
+        )
+
+    return updated

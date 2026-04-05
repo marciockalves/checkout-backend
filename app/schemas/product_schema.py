@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Optional
 from uuid import UUID
 
 
@@ -16,4 +17,12 @@ class ProductRead(ProductBase):
     id: UUID
     class Config:
         from_attributes = True
-        
+
+class ProductUpdate(BaseModel):
+    name: Optional[str] = Field(None, examples=["Caneca de Café"])
+    price: Optional[float] = Field(None, examples=[29.90])
+    stock_quantity: Optional[int] = Field(None, examples=[15])
+    image_url: Optional[str] = Field(None, examples=["http://.../123455.jpg"])
+
+    class config:
+        from_attributes = True
