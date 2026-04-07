@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func, asc, desc
 from sqlalchemy.future import select
 from app.models.product import Product
 from app.schemas.product_schema import ProductUpdate
@@ -42,4 +43,38 @@ class ProductRepository:
             return product
     
         return None
+
+    async def get_all_paginated(
+            self,
+            page: int = 1,
+            size: int = 20,
+            sort_by: str = "name",
+            order: str = "asc"
+    ):
+        query = select(Product)
+
+        column = getattr(Product, sort_by, Product.name)
+        if order.lower() == "desc":
+            query = query.order_by(desc(column))
+        else:
+            query = query.order_by(asc(column))
+
+        count_query = select(func.count()).select_from(Product)
+        total_result = await self.db.execute(count_query)
+        total = total_result.scalar()
+
+        offset = (page -1) * size
+        query = query.offset(offset).limit(size)
         
+        result = await self.db.execute(query)
+        items = result.scalar().all()
+
+        pages = (total + size - 1) // size
+
+        return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "size": size,
+        "pages": pages
+        }

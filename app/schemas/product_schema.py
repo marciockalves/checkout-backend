@@ -26,3 +26,10 @@ class ProductUpdate(BaseModel):
 
     class config:
         from_attributes = True
+
+class ProductPaginationResponse(BaseModel):
+    items: list[ProductRead]
+    total: int
+    page: int
+    size: int
+    pages: int
