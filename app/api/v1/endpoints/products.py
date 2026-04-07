@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.product_schema import ProductRead, ProductUpdate
+from app.dependencies import get_product_service
+from app.schemas.product_schema import ProductPaginationResponse, ProductRead, ProductUpdate
 from app.repository.product_repository import ProductRepository
 from app.db.session import get_db
+from app.services.product_service import ProductService
 from app.services.storage_service import StorageService
 
 
@@ -48,8 +50,8 @@ async def get_product(barcode: str, db:AsyncSession= Depends(get_db)):
 
 @router.put("/{barcode}", response_model=ProductUpdate)
 async def update_produtct(barcode: str, 
-                          payload: ProductUpdate, 
-                          db: AsyncSession = Depends(get_db)):
+                        payload: ProductUpdate, 
+                        db: AsyncSession = Depends(get_db)):
 
     repo = ProductRepository(db)
     updated = await repo.update_by_barcode(barcode, payload)
@@ -63,3 +65,19 @@ async def update_produtct(barcode: str,
         )
 
     return updated
+
+
+@router.get("/", response_model = ProductPaginationResponse)
+async def list_products(
+    page: int =  Query(1, ge=1, description = "número de página"),
+    size: int = Query(20, ge=1, le=100, description="Itens por página"),
+    sort_by: str = Query("name", description="Coluna de Ordenação"),
+    order: str = Query("asc", regex="(asc|desc)$"),
+    service: ProductService = Depends(get_product_service)
+):
+    return await service.get_all_paginated(
+        page=page,
+        size=size,
+        sort_by=sort_by,
+        order=order
+    )
